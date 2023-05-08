@@ -4,15 +4,15 @@
   box-sizing: border-box;
 }
 
-.shop-container{
+.twin-container{
   display: flex;
 
 }
 .product-container{
-  max-width: 70%;
+  min-width: 70%;
   padding: 0 16px;
   margin-right: 5px;
-  margin-left: 12%;
+  margin-left: 12px;
   border-right: 1px solid gray;
 }
 .cart-container{
