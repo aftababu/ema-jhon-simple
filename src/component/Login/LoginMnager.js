@@ -9,6 +9,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   FacebookAuthProvider,
+  sendEmailVerification,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "./Login";
 
@@ -86,11 +88,11 @@ export const handleFbSignIn = () => {
 export const createUserwithEmailandPassword = (name, email, password) => {
   return createUserWithEmailAndPassword(auth, email, password)
     .then((res) => {
-      // const user = userCredential.user;
-      const newUserInfo = res.user;
+      const user = res.user;
+      const newUserInfo = user;
       newUserInfo.error = "";
       newUserInfo.success = true;
-      // updateUserName(user.name);
+      verifyEmail();
       return newUserInfo;
       // Signed in
       // console.log(newUserInfo, user);
@@ -98,8 +100,8 @@ export const createUserwithEmailandPassword = (name, email, password) => {
     .catch((error) => {
       const newUserInfo = {};
       newUserInfo.error = error.code;
-      newUserInfo.email = "";
-      newUserInfo.password = "";
+      // newUserInfo.email = "";
+      // newUserInfo.password = "";
       newUserInfo.success = false;
       // e.target.password.value = "";
       return newUserInfo;
@@ -131,5 +133,39 @@ export const signInwithEmailandPassword = (email, password) => {
       // setUser(newUser);
       // console.log(newUser);
       return newUserInfo;
+    });
+};
+
+export const updateUserName = (name) => {
+  const user = auth.currentUser;
+  updateProfile(user, {
+    displayName: name,
+  })
+    .then((res) => {
+      console.log("name updated succesfully");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+const verifyEmail = (email) => {
+  // const auth = getAuth();
+  sendEmailVerification(auth.currentUser).then(() => {
+    // Email verification sent!
+    // ...
+  });
+};
+
+export const resetPassword = (email) => {
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      // Password reset email sent!
+      // ..
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ..
     });
 };

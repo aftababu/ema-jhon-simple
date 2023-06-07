@@ -7,7 +7,9 @@ import {
   handleGoogleSignIn,
   handleSignOut,
   initializeLoginFrameWork,
+  resetPassword,
   signInwithEmailandPassword,
+  updateUserName,
 } from "./LoginMnager";
 import { getAuth, updateProfile } from "firebase/auth";
 
@@ -56,9 +58,13 @@ function Login() {
   };
   const handleBlur = (e) => {
     let isFieldValid = true;
+    if (e.target.name === "name") {
+      isFieldValid = /^[a-z ,.'-]+$/i.test(e.target.value);
+    }
     if (e.target.name === "email") {
       isFieldValid = /\S+@\S+\.\S+/.test(e.target.value);
     }
+
     if (e.target.name === "password") {
       const isPassWordValid = e.target.value.length > 6;
       const passwordHasNumber = /\d{1}/.test(e.target.value);
@@ -67,9 +73,12 @@ function Login() {
     if (isFieldValid) {
       const newUserInfo = { ...user };
       newUserInfo[e.target.name] = e.target.value;
+      // newUserInfo.name = e.target.value;
       setUser(newUserInfo);
+      console.log(user);
     } else {
       const newUserInfo = { ...user };
+      newUserInfo["name"] = "";
       newUserInfo["email"] = "";
       newUserInfo["password"] = "";
       setUser(newUserInfo);
@@ -80,8 +89,12 @@ function Login() {
     if (newUser && user.email && user.password) {
       createUserwithEmailandPassword(user.name, user.email, user.password).then(
         (res) => {
-          handleResponse(res, false);
-          // navigate(from);
+          // setUser(res);
+          // setLoggedInUser(res);
+          updateUserName(user.name);
+          handleResponse(res, true);
+          // console.log(user);
+          // navigate("/login");
         }
       );
     }
@@ -92,21 +105,10 @@ function Login() {
     }
     e.preventDefault();
   };
-  const updateUserName = (name) => {
-    const user = auth.currentUser;
-    updateProfile(user, {
-      displayName: name,
-    })
-      .then((res) => {
-        console.log("name updated succesfully");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+
   return (
     <div style={{ textAlign: "center" }}>
-      {user.isSignIn ? (
+      {user?.isSignIn ? (
         <button onClick={() => signOut()}>sign out</button>
       ) : (
         <>
@@ -141,7 +143,7 @@ function Login() {
         <br />
         <input
           type="email"
-          placeholder="Username"
+          placeholder="Email"
           name="email"
           onBlur={handleBlur}
           required
@@ -157,6 +159,7 @@ function Login() {
         <br />
         <input type="submit" value={newUser ? "Sign Up" : "Sign in"} />
       </form>
+      <button onClick={() => resetPassword(user.email)}>forgot password</button>
       <h3 style={{ color: "red" }}>{user.error}</h3>
       {user.success && (
         <h3 style={{ color: "green" }}>

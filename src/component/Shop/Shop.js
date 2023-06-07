@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from "react";
-import fakeData from "../../fakeData";
+import { Cart, Product } from "../index";
 import "./Shop.css";
-import Product from "../Product/Product";
-import Cart from "../Cart/Cart";
 import { addToDb, clearTheCart, getStoredCart } from "../../utilities/fakedb";
 import { Link } from "react-router-dom";
 const Shop = (props) => {
-  const first10 = fakeData.slice(0, 10);
-  const [product, setProduct] = useState(first10);
+  // const first10 = fakeData.slice(0, 10);
+  const [products, setProduct] = useState([]);
   const [cart, setCart] = useState([]);
   useEffect(() => {
+    fetch("http://localhost:4200/product")
+      .then((res) => res.json())
+      .then((data) => setProduct(data));
     const saveCart = getStoredCart();
     const productKey = Object.keys(saveCart);
-    const previousCart = productKey.map((exzistingKey) => {
-      const product = fakeData.find((pd) => pd.key === exzistingKey);
-      product.quantity = saveCart[exzistingKey];
-      return product;
-    });
-    setCart(previousCart);
-    // console.log(saveCart, productKey);
+    fetch("http://localhost:4200/productKeys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productKey),
+    })
+      .then((res) => res.json())
+      .then((data) => setCart(data));
   }, []);
   const handleAddProduct = (product) => {
     // console.log("first", product);
@@ -41,7 +42,7 @@ const Shop = (props) => {
   return (
     <div className="twin-container">
       <div className="product-container">
-        {product.map((product) => (
+        {products.slice(0, 10).map((product) => (
           <Product
             key={product.key}
             showAddToCart={true}
